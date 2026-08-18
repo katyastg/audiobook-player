@@ -1,0 +1,55 @@
+// Minimal service worker: only makes the app installable and loads the
+// shell instantly. It deliberately does NOT cache books.json or any audio
+// file, so listening always streams fresh over the network and nothing is
+// stored on the phone.
+
+const CACHE_NAME = "ab-shell-v1"; // bump this string whenever shell files change
+const SHELL_FILES = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./app.js",
+  "./manifest.json",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_FILES))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+  const isShellFile =
+    url.origin === self.location.origin &&
+    SHELL_FILES.some((f) => url.pathname.endsWith(f.replace("./", "")) || url.pathname === "/");
+
+  if (!isShellFile) {
+    // Let books.json, mp3s, and anything else go straight to the network.
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request)
+        .then((res) => {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
+          return res;
+        })
+        .catch(() => cached);
+      return cached || network;
+    })
+  );
+});

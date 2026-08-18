@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Аудиокниги</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f5d62">
+
+<!-- iOS "Add to Home Screen" support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Аудиокниги">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Аудиокниги</h1>
+</header>
+
+<main>
+
+  <section class="random-block">
+    <button id="randomPlayBtn" class="big-button" type="button">▶ Играть</button>
+    <p class="hint">Случайная книга со случайного момента</p>
+  </section>
+
+  <section id="nowPlaying" class="now-playing" hidden>
+    <div class="np-title" id="npTitle">—</div>
+    <div class="np-controls">
+      <button id="playPauseBtn" class="round-button" type="button" aria-label="Пауза / Play">⏸</button>
+      <div class="np-time">
+        <input id="seekBar" type="range" min="0" max="0" step="1" value="0">
+        <div class="np-time-labels">
+          <span id="npCurrent">0:00</span>
+          <span id="npDuration">0:00</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sleep-timer">
+    <h2>Таймер сна</h2>
+    <div class="timer-buttons">
+      <button class="timer-btn" data-minutes="15" type="button">15 мин</button>
+      <button class="timer-btn" data-minutes="30" type="button">30 мин</button>
+      <button class="timer-btn" data-minutes="45" type="button">45 мин</button>
+      <button class="timer-btn" data-minutes="60" type="button">60 мин</button>
+    </div>
+    <div id="timerStatus" class="timer-status" hidden>
+      <span id="timerCountdown">—</span>
+      <button id="timerCancelBtn" type="button" class="link-button">Отменить</button>
+    </div>
+  </section>
+
+  <section class="book-list-section">
+    <h2>Все книги</h2>
+    <ul id="bookList" class="book-list"></ul>
+    <p id="emptyState" class="empty-state" hidden>Книги пока не добавлены.</p>
+  </section>
+
+</main>
+
+<audio id="player" preload="metadata"></audio>
+
+<script src="app.js"></script>
+</body>
+</html>
