@@ -3,7 +3,7 @@
 // file, so listening always streams fresh over the network and nothing is
 // stored on the phone.
 
-const CACHE_NAME = "ab-shell-v4"; // bump this string whenever shell files change
+const CACHE_NAME = "ab-shell-v5"; // bump this string whenever shell files change
 const SHELL_FILES = [
   "./",
   "./index.html",
@@ -48,8 +48,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // "no-cache" still uses the HTTP cache but always revalidates with the
+  // server, so a deploy is picked up immediately instead of after Pages'
+  // ten-minute max-age expires.
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-cache" })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));

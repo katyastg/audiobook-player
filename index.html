@@ -20,7 +20,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="style.css">
+<!-- ?v= is a cache buster: GitHub Pages serves assets with max-age=600, so
+     without it a phone keeps running the previous app.js for ten minutes
+     after a deploy. Bump it whenever app.js or style.css changes. -->
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -55,6 +58,6 @@
 
 <audio id="player" preload="metadata"></audio>
 
-<script src="app.js"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
