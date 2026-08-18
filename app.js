@@ -22,6 +22,7 @@
   let books = [];
   let currentBook = null;
   let draggingBookId = null;
+  let pendingSeek = 0;
   let saveTimer = null;
   let sleepTimeoutId = null;
   let sleepCountdownId = null;
@@ -131,10 +132,15 @@
       row.appendChild(seek);
       row.appendChild(time);
 
+      const status = document.createElement("div");
+      status.className = "book-status";
+      status.hidden = true;
+
       li.appendChild(title);
       li.appendChild(row);
+      li.appendChild(status);
 
-      bookEls[book.id] = { li, playBtn, seek, time };
+      bookEls[book.id] = { li, playBtn, seek, time, status };
 
       li.addEventListener("click", () => handlePlayBook(book));
 
@@ -224,31 +230,49 @@
     }
   }
 
+  function setStatus(book, text) {
+    const refs = book && bookEls[book.id];
+    if (!refs) return;
+    refs.status.textContent = text || "";
+    refs.status.hidden = !text;
+  }
+
+  // Seeking has to be retried: the position can only be set once the
+  // browser knows the stream, and on a fresh <audio> that happens after
+  // load. Without the retry a random start silently collapsed to 0:00.
+  function applyPendingSeek() {
+    if (!pendingSeek) return;
+    try {
+      audio.currentTime = pendingSeek;
+    } catch (e) {
+      /* not seekable yet — a later event will retry */
+    }
+  }
+
   // Kept intentionally synchronous up to the audio.play() call — mobile
   // browsers only allow starting playback if play() runs inside the same
   // call stack as the user gesture (the click). Waiting for
   // "loadedmetadata" before calling play() (the old approach) loses that
   // gesture on iOS/Android and play() silently does nothing.
   function playBook(book, atSeconds) {
+    const previous = currentBook;
     currentBook = book;
+    if (previous && previous.id !== book.id) setStatus(previous, "");
     localStorage.setItem(LAST_BOOK_KEY, book.id);
 
-    const startAt = Math.max(0, atSeconds || 0);
-
-    const onReady = () => {
-      audio.removeEventListener("loadedmetadata", onReady);
-      if (startAt > 0 && isFinite(audio.duration)) {
-        audio.currentTime = Math.min(startAt, Math.max(0, audio.duration - 1));
-      }
-    };
+    pendingSeek = Math.max(0, atSeconds || 0);
+    setStatus(book, "загружаю…");
 
     audio.pause();
     audio.src = bookUrl(book);
-    audio.addEventListener("loadedmetadata", onReady, { once: true });
     audio.load();
 
     const playPromise = audio.play();
-    if (playPromise && playPromise.catch) playPromise.catch(() => {});
+    if (playPromise && playPromise.catch) {
+      playPromise.catch((err) => {
+        setStatus(book, "не запускается: " + (err && err.name ? err.name : "ошибка"));
+      });
+    }
 
     refreshAllRows();
     startAutoSave();
@@ -288,8 +312,32 @@
   }
 
   audio.addEventListener("timeupdate", () => {
-    if (!currentBook || !isFinite(audio.duration)) return;
+    if (!currentBook) return;
     refreshBookRow(currentBook);
+  });
+
+  audio.addEventListener("loadedmetadata", applyPendingSeek);
+  audio.addEventListener("canplay", applyPendingSeek);
+  audio.addEventListener("seeked", () => {
+    if (pendingSeek && Math.abs(audio.currentTime - pendingSeek) < 5) pendingSeek = 0;
+  });
+
+  audio.addEventListener("waiting", () => {
+    if (currentBook) setStatus(currentBook, "буферизую…");
+  });
+  audio.addEventListener("playing", () => {
+    if (currentBook) setStatus(currentBook, "");
+  });
+  audio.addEventListener("error", () => {
+    if (!currentBook) return;
+    const codes = {
+      1: "воспроизведение прервано",
+      2: "нет связи с сервером",
+      3: "файл не читается",
+      4: "формат не поддерживается",
+    };
+    const code = audio.error ? audio.error.code : 0;
+    setStatus(currentBook, "ошибка: " + (codes[code] || "неизвестная") + " (код " + code + ")");
   });
 
   audio.addEventListener("play", () => {
