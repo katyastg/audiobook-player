@@ -14,24 +14,21 @@
 
   const audio = document.getElementById("player");
   const randomPlayBtn = document.getElementById("randomPlayBtn");
-  const nowPlaying = document.getElementById("nowPlaying");
-  const npTitle = document.getElementById("npTitle");
-  const npCurrent = document.getElementById("npCurrent");
-  const npDuration = document.getElementById("npDuration");
-  const seekBar = document.getElementById("seekBar");
-  const playPauseBtn = document.getElementById("playPauseBtn");
   const bookListEl = document.getElementById("bookList");
   const emptyStateEl = document.getElementById("emptyState");
-  const timerStatusEl = document.getElementById("timerStatus");
   const timerCountdownEl = document.getElementById("timerCountdown");
   const timerCancelBtn = document.getElementById("timerCancelBtn");
 
   let books = [];
   let currentBook = null;
+  let draggingBookId = null;
   let saveTimer = null;
   let sleepTimeoutId = null;
   let sleepCountdownId = null;
   let sleepEndsAt = null;
+
+  // book.id -> { li, playBtn, seek, time }
+  const bookEls = {};
 
   function bookUrl(book) {
     return (
@@ -94,6 +91,8 @@
 
   function renderBookList() {
     bookListEl.innerHTML = "";
+    Object.keys(bookEls).forEach((k) => delete bookEls[k]);
+
     if (!books.length) {
       emptyStateEl.hidden = false;
       return;
@@ -105,58 +104,134 @@
       li.className = "book-item";
       li.dataset.bookId = book.id;
 
-      const info = document.createElement("div");
-      info.className = "book-info";
-
       const title = document.createElement("div");
       title.className = "book-title";
       title.textContent = book.title;
 
-      const progress = document.createElement("div");
-      progress.className = "book-progress";
-      const p = getProgress(book.id);
-      if (p.t && p.t > 5) {
-        progress.textContent = "продолжить с " + formatTime(p.t);
-      } else {
-        progress.textContent = "не начато · " + formatTime(book.durationSeconds);
-      }
+      const row = document.createElement("div");
+      row.className = "book-row";
 
-      info.appendChild(title);
-      info.appendChild(progress);
+      const playBtn = document.createElement("button");
+      playBtn.type = "button";
+      playBtn.className = "book-play-btn";
+      playBtn.textContent = "▶";
+      playBtn.setAttribute("aria-label", "Играть");
 
-      const icon = document.createElement("div");
-      icon.className = "book-play-icon";
-      icon.textContent = "▶";
+      const seek = document.createElement("input");
+      seek.type = "range";
+      seek.className = "book-seek";
+      seek.min = "0";
+      seek.max = String(Math.floor(book.durationSeconds || 0));
+      seek.value = "0";
 
-      li.appendChild(info);
-      li.appendChild(icon);
+      const time = document.createElement("span");
+      time.className = "book-time";
 
-      li.addEventListener("click", () => {
-        const prog = getProgress(book.id);
-        playBook(book, prog.t || 0);
+      row.appendChild(playBtn);
+      row.appendChild(seek);
+      row.appendChild(time);
+
+      li.appendChild(title);
+      li.appendChild(row);
+
+      bookEls[book.id] = { li, playBtn, seek, time };
+
+      li.addEventListener("click", () => handlePlayBook(book));
+
+      playBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handlePlayBook(book);
+      });
+
+      seek.addEventListener("click", (e) => e.stopPropagation());
+      seek.addEventListener("pointerdown", () => {
+        draggingBookId = book.id;
+      });
+      seek.addEventListener("pointerup", () => {
+        draggingBookId = null;
+      });
+
+      seek.addEventListener("input", (e) => {
+        e.stopPropagation();
+        const val = Number(seek.value);
+        if (currentBook && currentBook.id === book.id) {
+          audio.currentTime = val;
+        }
+        renderTimeLabel(book, val, currentBook && currentBook.id === book.id);
+      });
+
+      seek.addEventListener("change", (e) => {
+        e.stopPropagation();
+        draggingBookId = null;
+        const val = Number(seek.value);
+        if (!currentBook || currentBook.id !== book.id) {
+          playBook(book, val);
+        }
       });
 
       bookListEl.appendChild(li);
-    });
 
-    highlightPlayingBook();
+      refreshBookRow(book);
+    });
   }
 
-  function highlightPlayingBook() {
-    Array.from(bookListEl.children).forEach((li) => {
-      li.classList.toggle("playing", currentBook && li.dataset.bookId === currentBook.id);
-    });
+  function currentSeconds(book) {
+    if (currentBook && currentBook.id === book.id) return audio.currentTime;
+    return getProgress(book.id).t || 0;
+  }
+
+  function renderTimeLabel(book, seconds, isCurrentish) {
+    const refs = bookEls[book.id];
+    if (!refs) return;
+    if (isCurrentish || seconds > 5) {
+      refs.time.textContent = formatTime(seconds) + " / " + formatTime(book.durationSeconds);
+    } else {
+      refs.time.textContent = formatTime(book.durationSeconds);
+    }
+  }
+
+  function refreshBookRow(book) {
+    const refs = bookEls[book.id];
+    if (!refs) return;
+    const isCurrent = !!(currentBook && currentBook.id === book.id);
+    const seconds = currentSeconds(book);
+
+    if (draggingBookId !== book.id) {
+      refs.seek.value = String(Math.floor(Math.min(seconds, book.durationSeconds || seconds)));
+    }
+    renderTimeLabel(book, seconds, isCurrent);
+    refs.playBtn.textContent = isCurrent && !audio.paused ? "⏸" : "▶";
+    refs.li.classList.toggle("playing", isCurrent);
+  }
+
+  function refreshAllRows() {
+    books.forEach(refreshBookRow);
   }
 
   // ---------- playback ----------
 
+  function handlePlayBook(book) {
+    if (currentBook && currentBook.id === book.id) {
+      if (audio.paused) {
+        const p = audio.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        audio.pause();
+      }
+    } else {
+      const prog = getProgress(book.id);
+      playBook(book, prog.t || 0);
+    }
+  }
+
+  // Kept intentionally synchronous up to the audio.play() call — mobile
+  // browsers only allow starting playback if play() runs inside the same
+  // call stack as the user gesture (the click). Waiting for
+  // "loadedmetadata" before calling play() (the old approach) loses that
+  // gesture on iOS/Android and play() silently does nothing.
   function playBook(book, atSeconds) {
     currentBook = book;
     localStorage.setItem(LAST_BOOK_KEY, book.id);
-
-    nowPlaying.hidden = false;
-    npTitle.textContent = book.title;
-    highlightPlayingBook();
 
     const startAt = Math.max(0, atSeconds || 0);
 
@@ -165,7 +240,6 @@
       if (startAt > 0 && isFinite(audio.duration)) {
         audio.currentTime = Math.min(startAt, Math.max(0, audio.duration - 1));
       }
-      audio.play().catch(() => {});
     };
 
     audio.pause();
@@ -173,6 +247,10 @@
     audio.addEventListener("loadedmetadata", onReady, { once: true });
     audio.load();
 
+    const playPromise = audio.play();
+    if (playPromise && playPromise.catch) playPromise.catch(() => {});
+
+    refreshAllRows();
     startAutoSave();
   }
 
@@ -209,43 +287,25 @@
     }
   }
 
-  // ---------- now-playing controls ----------
-
   audio.addEventListener("timeupdate", () => {
-    if (!isFinite(audio.duration)) return;
-    npCurrent.textContent = formatTime(audio.currentTime);
-    npDuration.textContent = formatTime(audio.duration);
-    if (!seekBar.matches(":active")) {
-      seekBar.max = Math.floor(audio.duration);
-      seekBar.value = Math.floor(audio.currentTime);
-    }
-  });
-
-  seekBar.addEventListener("input", () => {
-    audio.currentTime = Number(seekBar.value);
-  });
-
-  playPauseBtn.addEventListener("click", () => {
-    if (audio.paused) {
-      audio.play().catch(() => {});
-    } else {
-      audio.pause();
-    }
+    if (!currentBook || !isFinite(audio.duration)) return;
+    refreshBookRow(currentBook);
   });
 
   audio.addEventListener("play", () => {
-    playPauseBtn.textContent = "⏸";
+    if (currentBook) refreshBookRow(currentBook);
   });
   audio.addEventListener("pause", () => {
-    playPauseBtn.textContent = "▶";
     persistCurrentPosition();
-    renderBookList();
+    refreshAllRows();
   });
   audio.addEventListener("ended", () => {
     if (currentBook) {
       saveProgress(currentBook.id, 0);
+      const ended = currentBook;
+      currentBook = null;
+      refreshBookRow(ended);
     }
-    renderBookList();
   });
 
   // Persist position when the phone backgrounds/locks or the page is hidden.
@@ -267,7 +327,8 @@
       btn.classList.toggle("active", Number(btn.dataset.minutes) === minutes);
     });
 
-    timerStatusEl.hidden = false;
+    timerCountdownEl.hidden = false;
+    timerCancelBtn.hidden = false;
     updateSleepCountdown();
     sleepCountdownId = setInterval(updateSleepCountdown, 1000);
   }
@@ -275,7 +336,7 @@
   function updateSleepCountdown() {
     if (!sleepEndsAt) return;
     const remaining = Math.max(0, Math.round((sleepEndsAt - Date.now()) / 1000));
-    timerCountdownEl.textContent = "Пауза через " + formatTime(remaining);
+    timerCountdownEl.textContent = formatTime(remaining);
   }
 
   function fireSleepTimer() {
@@ -290,7 +351,8 @@
     sleepTimeoutId = null;
     sleepCountdownId = null;
     sleepEndsAt = null;
-    timerStatusEl.hidden = true;
+    timerCountdownEl.hidden = true;
+    timerCancelBtn.hidden = true;
     document.querySelectorAll(".timer-btn").forEach((btn) => btn.classList.remove("active"));
   }
 
