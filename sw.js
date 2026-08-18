@@ -3,7 +3,7 @@
 // file, so listening always streams fresh over the network and nothing is
 // stored on the phone.
 
-const CACHE_NAME = "ab-shell-v1"; // bump this string whenever shell files change
+const CACHE_NAME = "ab-shell-v2"; // bump this string whenever shell files change
 const SHELL_FILES = [
   "./",
   "./index.html",
