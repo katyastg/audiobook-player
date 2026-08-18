@@ -25,11 +25,6 @@
 
 <main>
 
-  <section class="random-block">
-    <button id="randomPlayBtn" class="big-button" type="button">▶ Играть</button>
-    <p class="hint">Случайная книга со случайного момента</p>
-  </section>
-
   <section id="nowPlaying" class="now-playing" hidden>
     <div class="np-title" id="npTitle">—</div>
     <div class="np-controls">
@@ -59,7 +54,10 @@
   </section>
 
   <section class="book-list-section">
-    <h2>Все книги</h2>
+    <div class="book-list-header">
+      <h2>Все книги</h2>
+      <button id="randomPlayBtn" class="random-button" type="button">🎲 Рандом</button>
+    </div>
     <ul id="bookList" class="book-list"></ul>
     <p id="emptyState" class="empty-state" hidden>Книги пока не добавлены.</p>
   </section>

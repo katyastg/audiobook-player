@@ -45,30 +45,6 @@ h2 {
   margin: 0 0 10px 4px;
 }
 
-.random-block {
-  text-align: center;
-}
-
-.big-button {
-  width: 100%;
-  font-size: 22px;
-  font-weight: 700;
-  padding: 22px 16px;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(47,93,98,0.35);
-  cursor: pointer;
-}
-.big-button:active { background: var(--accent-dark); }
-
-.hint {
-  color: var(--muted);
-  font-size: 14px;
-  margin: 10px 4px 0 4px;
-}
-
 .now-playing {
   background: var(--card);
   border-radius: var(--radius);
@@ -144,6 +120,26 @@ h2 {
   cursor: pointer;
   padding: 4px;
 }
+
+.book-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px 0;
+}
+.book-list-header h2 { margin: 0 0 0 4px; }
+.random-button {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--accent);
+  background: #fff;
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.random-button:active { background: var(--accent); color: #fff; }
 
 .book-list {
   list-style: none;
