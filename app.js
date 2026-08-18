@@ -12,7 +12,7 @@
   // Content-Type: application/octet-stream on asset downloads, which iOS
   // Safari refuses to decode — the worker only rewrites the headers.
   // Empty string falls back to the direct GitHub URL.
-  const AUDIO_BASE = "";
+  const AUDIO_BASE = "https://hp-audio.stegantseva20.workers.dev";
 
   const PROGRESS_KEY = "ab_progress_v3";
   const LAST_BOOK_KEY = "ab_last_book_v3";
