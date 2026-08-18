@@ -1,1 +1,51 @@
-[]
+[
+  {
+    "id": "book-1",
+    "title": "Гарри Поттер и Философский камень",
+    "tag": "book-1",
+    "file": "book-1.mp3",
+    "durationSeconds": 40626
+  },
+  {
+    "id": "book-2",
+    "title": "Гарри Поттер и Тайная комната",
+    "tag": "book-2",
+    "file": "book-2.mp3",
+    "durationSeconds": 37603
+  },
+  {
+    "id": "book-3",
+    "title": "Гарри Поттер и Узник Азкабана",
+    "tag": "book-3",
+    "file": "book-3.mp3",
+    "durationSeconds": 45577
+  },
+  {
+    "id": "book-4",
+    "title": "Гарри Поттер и Кубок огня",
+    "tag": "book-4",
+    "file": "book-4.mp3",
+    "durationSeconds": 76445
+  },
+  {
+    "id": "book-5",
+    "title": "Гарри Поттер и Орден Феникса",
+    "tag": "book-5",
+    "file": "book-5.mp3",
+    "durationSeconds": 92103
+  },
+  {
+    "id": "book-6",
+    "title": "Гарри Поттер и Принц-полукровка",
+    "tag": "book-6",
+    "file": "book-6.mp3",
+    "durationSeconds": 72299
+  },
+  {
+    "id": "book-7",
+    "title": "Гарри Поттер и Дары смерти",
+    "tag": "book-7",
+    "file": "book-7.mp3",
+    "durationSeconds": 84972
+  }
+]

@@ -1,10 +1,16 @@
 (() => {
   "use strict";
 
-  const PROGRESS_KEY = "ab_progress_v1";
-  const LAST_BOOK_KEY = "ab_last_book_v1";
+  // Each book is one continuous mp3 attached as a GitHub Release asset.
+  // Streamed straight from GitHub over HTTP range requests — nothing is
+  // downloaded/stored on the phone.
+  const REPO_OWNER = "katyastg";
+  const REPO_NAME = "audiobook-player";
+
+  const PROGRESS_KEY = "ab_progress_v3";
+  const LAST_BOOK_KEY = "ab_last_book_v3";
   const SAVE_INTERVAL_MS = 5000;
-  const TAIL_BUFFER_SEC = 20; // don't randomly land in the very last few seconds
+  const TAIL_BUFFER_SEC = 30; // don't randomly land in the very last bit of a book
 
   const audio = document.getElementById("player");
   const randomPlayBtn = document.getElementById("randomPlayBtn");
@@ -26,6 +32,19 @@
   let sleepTimeoutId = null;
   let sleepCountdownId = null;
   let sleepEndsAt = null;
+
+  function bookUrl(book) {
+    return (
+      "https://github.com/" +
+      REPO_OWNER +
+      "/" +
+      REPO_NAME +
+      "/releases/download/" +
+      book.tag +
+      "/" +
+      book.file
+    );
+  }
 
   // ---------- progress storage ----------
 
@@ -99,7 +118,7 @@
       if (p.t && p.t > 5) {
         progress.textContent = "продолжить с " + formatTime(p.t);
       } else {
-        progress.textContent = "не начато";
+        progress.textContent = "не начато · " + formatTime(book.durationSeconds);
       }
 
       info.appendChild(title);
@@ -150,7 +169,7 @@
     };
 
     audio.pause();
-    audio.src = book.url;
+    audio.src = bookUrl(book);
     audio.addEventListener("loadedmetadata", onReady, { once: true });
     audio.load();
 
