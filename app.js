@@ -7,6 +7,13 @@
   const REPO_OWNER = "katyastg";
   const REPO_NAME = "audiobook-player";
 
+  // Books are streamed through a Cloudflare Worker (see worker.js) rather
+  // than straight from the GitHub release. GitHub forces
+  // Content-Type: application/octet-stream on asset downloads, which iOS
+  // Safari refuses to decode — the worker only rewrites the headers.
+  // Empty string falls back to the direct GitHub URL.
+  const AUDIO_BASE = "";
+
   const PROGRESS_KEY = "ab_progress_v3";
   const LAST_BOOK_KEY = "ab_last_book_v3";
   const SAVE_INTERVAL_MS = 5000;
@@ -32,6 +39,9 @@
   const bookEls = {};
 
   function bookUrl(book) {
+    if (AUDIO_BASE) {
+      return AUDIO_BASE.replace(/\/+$/, "") + "/" + book.file;
+    }
     return (
       "https://github.com/" +
       REPO_OWNER +
