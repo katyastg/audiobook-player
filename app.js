@@ -217,10 +217,22 @@
   // ---------- playback ----------
 
   function handlePlayBook(book) {
+    // After a failed load the element keeps its error state, so calling
+    // play() again on the same src rejects immediately and the button
+    // looks dead. Re-attach the source instead.
+    if (currentBook && currentBook.id === book.id && audio.error) {
+      playBook(book, audio.currentTime || getProgress(book.id).t || 0);
+      return;
+    }
+
     if (currentBook && currentBook.id === book.id) {
       if (audio.paused) {
         const p = audio.play();
-        if (p && p.catch) p.catch(() => {});
+        if (p && p.catch) {
+          p.catch((err) => {
+            setStatus(book, "не запускается: " + (err && err.name ? err.name : "ошибка"));
+          });
+        }
       } else {
         audio.pause();
       }

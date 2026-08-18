@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Проверка звука</title>
+<style>
+  body { font: 17px -apple-system, system-ui, sans-serif; padding: 16px; background:#111; color:#eee; }
+  h1 { font-size: 20px; }
+  .test { border:1px solid #444; border-radius:12px; padding:14px; margin:14px 0; }
+  .name { font-weight:600; margin-bottom:10px; }
+  button { font-size:18px; padding:14px 22px; width:100%; border-radius:10px;
+           border:none; background:#3a6; color:#fff; font-weight:600; }
+  .res { margin-top:10px; font-size:15px; line-height:1.5; white-space:pre-wrap;
+         font-family: ui-monospace, monospace; color:#9f9; }
+  .bad { color:#f88; }
+  .info { font-size:14px; color:#aaa; margin-top:14px; white-space:pre-wrap;
+          font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+
+<h1>Проверка звука на телефоне</h1>
+<p>Нажми обе кнопки по очереди и пришли скриншот.</p>
+
+<div class="test">
+  <div class="name">Тест 1 — короткий файл с самого сайта</div>
+  <button data-src="sample.mp3" data-out="r1">▶ Проверить тест 1</button>
+  <div class="res" id="r1">—</div>
+</div>
+
+<div class="test">
+  <div class="name">Тест 2 — книга с хранилища GitHub</div>
+  <button data-src="https://github.com/katyastg/audiobook-player/releases/download/book-1/book-1.mp3" data-out="r2">▶ Проверить тест 2</button>
+  <div class="res" id="r2">—</div>
+</div>
+
+<div class="info" id="env">—</div>
+
+<script>
+var ERRORS = {
+  1: "прервано",
+  2: "нет связи",
+  3: "файл не читается",
+  4: "ФОРМАТ НЕ ПОДДЕРЖИВАЕТСЯ"
+};
+
+document.getElementById("env").textContent =
+  "canPlayType audio/mpeg: '" + (new Audio().canPlayType("audio/mpeg") || "ПУСТО") + "'\n" +
+  "canPlayType octet-stream: '" + (new Audio().canPlayType("application/octet-stream") || "ПУСТО") + "'\n" +
+  navigator.userAgent;
+
+Array.prototype.forEach.call(document.querySelectorAll("button"), function (btn) {
+  btn.addEventListener("click", function () {
+    var out = document.getElementById(btn.dataset.out);
+    var log = [];
+    var a = new Audio();
+    a.preload = "auto";
+
+    function show(extra) {
+      out.className = "res";
+      out.textContent = log.join("\n") + (extra ? "\n" + extra : "");
+    }
+
+    ["loadstart","loadedmetadata","canplay","playing","waiting","stalled","suspend","error"]
+      .forEach(function (ev) {
+        a.addEventListener(ev, function () {
+          if (ev === "error") {
+            var c = a.error ? a.error.code : 0;
+            log.push("❌ ОШИБКА: " + (ERRORS[c] || "?") + " (код " + c + ")");
+            out.className = "res bad";
+          } else {
+            log.push("• " + ev);
+          }
+          show();
+        });
+      });
+
+    log.push("нажато…");
+    show();
+    a.src = btn.dataset.src;
+    a.load();
+    a.play().then(function () {
+      log.push("✅ play() принят");
+      show();
+    }).catch(function (e) {
+      log.push("❌ play() отклонён: " + e.name);
+      out.className = "res bad";
+      show();
+    });
+
+    setTimeout(function () {
+      show("итог: время=" + a.currentTime.toFixed(1) +
+           " сек, длительность=" + (isFinite(a.duration) ? Math.round(a.duration) + " сек" : "НЕИЗВЕСТНА") +
+           (a.currentTime > 0 ? "\n✅ ЗВУК ИДЁТ" : "\n❌ ЗВУКА НЕТ"));
+      a.pause();
+    }, 8000);
+  });
+});
+</script>
+</body>
+</html>
