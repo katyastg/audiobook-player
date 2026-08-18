@@ -11,6 +11,11 @@ they don't sit as garbage in the middle of the merged stream:
      stream — if left in place on a middle fragment, a decoder can treat it
      as "this is where the real content ends" and silently stop decoding
      partway through the merged file.
+
+The merged output therefore has no VBR header of its own. Run
+`add_vbr_header.py` on it afterwards to prepend one that describes the whole
+stream — without it browsers cannot work out the duration, `audio.duration`
+stays NaN, and seeking (including the random-start button) silently fails.
 """
 import sys
 import os
