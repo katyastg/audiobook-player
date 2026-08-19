@@ -2,50 +2,94 @@
   {
     "id": "book-1",
     "title": "Гарри Поттер и Философский камень",
-    "tag": "book-1",
-    "file": "book-1.mp3",
-    "durationSeconds": 40626
+    "files": [
+      {
+        "file": "audio/book-1.m4a",
+        "durationSeconds": 40625.371
+      }
+    ],
+    "durationSeconds": 40625.371
   },
   {
     "id": "book-2",
     "title": "Гарри Поттер и Тайная комната",
-    "tag": "book-2",
-    "file": "book-2.mp3",
-    "durationSeconds": 37603
+    "files": [
+      {
+        "file": "audio/book-2.m4a",
+        "durationSeconds": 37602.691
+      }
+    ],
+    "durationSeconds": 37602.691
   },
   {
     "id": "book-3",
     "title": "Гарри Поттер и Узник Азкабана",
-    "tag": "book-3",
-    "file": "book-3.mp3",
-    "durationSeconds": 45577
+    "files": [
+      {
+        "file": "audio/book-3.m4a",
+        "durationSeconds": 45576.542
+      }
+    ],
+    "durationSeconds": 45576.542
   },
   {
     "id": "book-4",
     "title": "Гарри Поттер и Кубок огня",
-    "tag": "book-4",
-    "file": "book-4.mp3",
-    "durationSeconds": 76445
+    "files": [
+      {
+        "file": "audio/book-4-1.m4a",
+        "durationSeconds": 38222.393
+      },
+      {
+        "file": "audio/book-4-2.m4a",
+        "durationSeconds": 38222.393
+      }
+    ],
+    "durationSeconds": 76444.786
   },
   {
     "id": "book-5",
     "title": "Гарри Поттер и Орден Феникса",
-    "tag": "book-5",
-    "file": "book-5.mp3",
-    "durationSeconds": 92103
+    "files": [
+      {
+        "file": "audio/book-5-1.m4a",
+        "durationSeconds": 44194.874
+      },
+      {
+        "file": "audio/book-5-2.m4a",
+        "durationSeconds": 44194.638
+      }
+    ],
+    "durationSeconds": 88389.512
   },
   {
     "id": "book-6",
     "title": "Гарри Поттер и Принц-полукровка",
-    "tag": "book-6",
-    "file": "book-6.mp3",
-    "durationSeconds": 72299
+    "files": [
+      {
+        "file": "audio/book-6-1.m4a",
+        "durationSeconds": 36149.264
+      },
+      {
+        "file": "audio/book-6-2.m4a",
+        "durationSeconds": 36149.29
+      }
+    ],
+    "durationSeconds": 72298.554
   },
   {
     "id": "book-7",
     "title": "Гарри Поттер и Дары смерти",
-    "tag": "book-7",
-    "file": "book-7.mp3",
-    "durationSeconds": 84972
+    "files": [
+      {
+        "file": "audio/book-7-1.m4a",
+        "durationSeconds": 40193.071
+      },
+      {
+        "file": "audio/book-7-2.m4a",
+        "durationSeconds": 40192.81
+      }
+    ],
+    "durationSeconds": 80385.881
   }
 ]

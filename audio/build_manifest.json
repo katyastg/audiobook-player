@@ -1,0 +1,60 @@
+{
+  "book-1": [
+    {
+      "file": "audio/book-1.m4a",
+      "durationSeconds": 40625.371437
+    }
+  ],
+  "book-2": [
+    {
+      "file": "audio/book-2.m4a",
+      "durationSeconds": 37602.690625
+    }
+  ],
+  "book-3": [
+    {
+      "file": "audio/book-3.m4a",
+      "durationSeconds": 45576.542062
+    }
+  ],
+  "book-4": [
+    {
+      "file": "audio/book-4-1.m4a",
+      "durationSeconds": 38222.3935
+    },
+    {
+      "file": "audio/book-4-2.m4a",
+      "durationSeconds": 38222.3935
+    }
+  ],
+  "book-5": [
+    {
+      "file": "audio/book-5-1.m4a",
+      "durationSeconds": 44194.8735
+    },
+    {
+      "file": "audio/book-5-2.m4a",
+      "durationSeconds": 44194.638375
+    }
+  ],
+  "book-6": [
+    {
+      "file": "audio/book-6-1.m4a",
+      "durationSeconds": 36149.263688
+    },
+    {
+      "file": "audio/book-6-2.m4a",
+      "durationSeconds": 36149.289812
+    }
+  ],
+  "book-7": [
+    {
+      "file": "audio/book-7-1.m4a",
+      "durationSeconds": 40193.071062
+    },
+    {
+      "file": "audio/book-7-2.m4a",
+      "durationSeconds": 40192.809813
+    }
+  ]
+}

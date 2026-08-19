@@ -1,19 +1,12 @@
 (() => {
   "use strict";
 
-  // Each book is one continuous mp3 attached as a GitHub Release asset.
-  // Streamed straight from GitHub over HTTP range requests — nothing is
-  // downloaded/stored on the phone.
-  const REPO_OWNER = "katyastg";
-  const REPO_NAME = "audiobook-player";
-
-  // Books are streamed through a Cloudflare Worker (see worker.js) rather
-  // than straight from the GitHub release. GitHub forces
-  // Content-Type: application/octet-stream on asset downloads, which iOS
-  // Safari refuses to decode — the worker only rewrites the headers.
-  // Empty string falls back to the direct GitHub URL.
-  const AUDIO_BASE = "https://hp-audio.stegantseva20.workers.dev";
-
+  // Each book is one or more .m4a files served straight from this same
+  // GitHub Pages site (see audio/), streamed over HTTP range requests —
+  // nothing is downloaded/stored on the phone. Long books are split into
+  // two files because Pages caps individual files at 100 MB; see
+  // resolvePart()/partStart() below for how playback stitches them back
+  // into one continuous timeline.
   const PROGRESS_KEY = "ab_progress_v3";
   const LAST_BOOK_KEY = "ab_last_book_v3";
   const SAVE_INTERVAL_MS = 5000;
@@ -28,6 +21,7 @@
 
   let books = [];
   let currentBook = null;
+  let currentPartIndex = 0;
   let draggingBookId = null;
   let pendingSeek = 0;
   let saveTimer = null;
@@ -38,20 +32,23 @@
   // book.id -> { li, playBtn, seek, time }
   const bookEls = {};
 
-  function bookUrl(book) {
-    if (AUDIO_BASE) {
-      return AUDIO_BASE.replace(/\/+$/, "") + "/" + book.file;
+  // ---------- multi-part timeline ----------
+  // book.files is [{ file, durationSeconds }, ...]; these turn a position
+  // in the whole book into (which file, how far into it) and back.
+
+  function partStart(book, index) {
+    let acc = 0;
+    for (let i = 0; i < index; i++) acc += book.files[i].durationSeconds || 0;
+    return acc;
+  }
+
+  function resolvePart(book, globalSeconds) {
+    let index = 0;
+    for (let i = 0; i < book.files.length; i++) {
+      if (globalSeconds >= partStart(book, i)) index = i;
     }
-    return (
-      "https://github.com/" +
-      REPO_OWNER +
-      "/" +
-      REPO_NAME +
-      "/releases/download/" +
-      book.tag +
-      "/" +
-      book.file
-    );
+    const offset = Math.max(0, globalSeconds - partStart(book, index));
+    return { index, offset };
   }
 
   // ---------- progress storage ----------
@@ -171,7 +168,14 @@
         e.stopPropagation();
         const val = Number(seek.value);
         if (currentBook && currentBook.id === book.id) {
-          audio.currentTime = val;
+          // Only move live if the drag is still inside the currently
+          // loaded part — jumping to a different part means swapping the
+          // audio source, too heavy to do on every drag tick. That jump
+          // happens once, on release, in the "change" handler below.
+          const { index, offset } = resolvePart(book, val);
+          if (index === currentPartIndex) {
+            audio.currentTime = offset;
+          }
         }
         renderTimeLabel(book, val, currentBook && currentBook.id === book.id);
       });
@@ -180,9 +184,7 @@
         e.stopPropagation();
         draggingBookId = null;
         const val = Number(seek.value);
-        if (!currentBook || currentBook.id !== book.id) {
-          playBook(book, val);
-        }
+        seekToGlobal(book, val);
       });
 
       bookListEl.appendChild(li);
@@ -192,7 +194,9 @@
   }
 
   function currentSeconds(book) {
-    if (currentBook && currentBook.id === book.id) return audio.currentTime;
+    if (currentBook && currentBook.id === book.id) {
+      return partStart(book, currentPartIndex) + audio.currentTime;
+    }
     return getProgress(book.id).t || 0;
   }
 
@@ -231,7 +235,7 @@
     // play() again on the same src rejects immediately and the button
     // looks dead. Re-attach the source instead.
     if (currentBook && currentBook.id === book.id && audio.error) {
-      playBook(book, audio.currentTime || getProgress(book.id).t || 0);
+      playBook(book, currentSeconds(book) || getProgress(book.id).t || 0);
       return;
     }
 
@@ -276,28 +280,53 @@
   // call stack as the user gesture (the click). Waiting for
   // "loadedmetadata" before calling play() (the old approach) loses that
   // gesture on iOS/Android and play() silently does nothing.
-  function playBook(book, atSeconds) {
-    const previous = currentBook;
+  function loadPart(book, partIndex, atSeconds, autoplay) {
     currentBook = book;
-    if (previous && previous.id !== book.id) setStatus(previous, "");
-    localStorage.setItem(LAST_BOOK_KEY, book.id);
-
+    currentPartIndex = partIndex;
     pendingSeek = Math.max(0, atSeconds || 0);
-    setStatus(book, "загружаю…");
 
     audio.pause();
-    audio.src = bookUrl(book);
+    audio.src = book.files[partIndex].file;
     audio.load();
 
-    const playPromise = audio.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch((err) => {
-        setStatus(book, "не запускается: " + (err && err.name ? err.name : "ошибка"));
-      });
+    if (autoplay) {
+      const playPromise = audio.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch((err) => {
+          setStatus(book, "не запускается: " + (err && err.name ? err.name : "ошибка"));
+        });
+      }
     }
 
     refreshAllRows();
     startAutoSave();
+  }
+
+  function playBook(book, atSeconds) {
+    const previous = currentBook;
+    if (previous && previous.id !== book.id) setStatus(previous, "");
+    localStorage.setItem(LAST_BOOK_KEY, book.id);
+    setStatus(book, "загружаю…");
+
+    const { index, offset } = resolvePart(book, atSeconds);
+    loadPart(book, index, offset, true);
+  }
+
+  // Jump to an arbitrary position in the whole book, switching to the
+  // right file if the target position falls in a different part than the
+  // one currently loaded. Preserves whatever play/pause state was active.
+  function seekToGlobal(book, val) {
+    if (currentBook && currentBook.id === book.id) {
+      const { index, offset } = resolvePart(book, val);
+      if (index === currentPartIndex) {
+        audio.currentTime = offset;
+        return;
+      }
+      const wasPlaying = !audio.paused;
+      loadPart(book, index, offset, wasPlaying);
+      return;
+    }
+    playBook(book, val);
   }
 
   function randomPlay() {
@@ -315,7 +344,7 @@
     stopAutoSave();
     saveTimer = setInterval(() => {
       if (currentBook && !audio.paused) {
-        saveProgress(currentBook.id, audio.currentTime);
+        saveProgress(currentBook.id, currentSeconds(currentBook));
       }
     }, SAVE_INTERVAL_MS);
   }
@@ -329,7 +358,7 @@
 
   function persistCurrentPosition() {
     if (currentBook && audio.currentTime > 0) {
-      saveProgress(currentBook.id, audio.currentTime);
+      saveProgress(currentBook.id, currentSeconds(currentBook));
     }
   }
 
@@ -370,12 +399,16 @@
     refreshAllRows();
   });
   audio.addEventListener("ended", () => {
-    if (currentBook) {
-      saveProgress(currentBook.id, 0);
-      const ended = currentBook;
-      currentBook = null;
-      refreshBookRow(ended);
+    if (!currentBook) return;
+    if (currentPartIndex < currentBook.files.length - 1) {
+      // Book continues in the next file — carry straight on.
+      loadPart(currentBook, currentPartIndex + 1, 0, true);
+      return;
     }
+    saveProgress(currentBook.id, 0);
+    const ended = currentBook;
+    currentBook = null;
+    refreshBookRow(ended);
   });
 
   // Persist position when the phone backgrounds/locks or the page is hidden.

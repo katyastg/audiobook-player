@@ -30,14 +30,14 @@
 </div>
 
 <div class="test">
-  <div class="name">Тест 2 — книга с хранилища GitHub</div>
-  <button data-src="https://github.com/katyastg/audiobook-player/releases/download/book-1/book-1.mp3" data-out="r2">▶ Проверить тест 2</button>
+  <div class="name">Тест 2 — целая книга с сайта (главный тест)</div>
+  <button data-src="audio/book-1.m4a" data-out="r2">▶ Проверить тест 2</button>
   <div class="res" id="r2">—</div>
 </div>
 
 <div class="test">
-  <div class="name">Тест 3 — книга через переходник (главный тест)</div>
-  <button data-src="https://hp-audio.stegantseva20.workers.dev/book-1.mp3" data-out="r3">▶ Проверить тест 3</button>
+  <div class="name">Тест 3 — вторая половина длинной книги</div>
+  <button data-src="audio/book-4-2.m4a" data-out="r3">▶ Проверить тест 3</button>
   <div class="res" id="r3">—</div>
 </div>
 
@@ -52,8 +52,8 @@ var ERRORS = {
 };
 
 document.getElementById("env").textContent =
+  "canPlayType audio/mp4: '" + (new Audio().canPlayType("audio/mp4") || "ПУСТО") + "'\n" +
   "canPlayType audio/mpeg: '" + (new Audio().canPlayType("audio/mpeg") || "ПУСТО") + "'\n" +
-  "canPlayType octet-stream: '" + (new Audio().canPlayType("application/octet-stream") || "ПУСТО") + "'\n" +
   navigator.userAgent;
 
 Array.prototype.forEach.call(document.querySelectorAll("button"), function (btn) {
