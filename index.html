@@ -6,7 +6,7 @@
 <title>Аудиокниги Гарри Поттер</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0c1a">
+<meta name="theme-color" content="#d9c49a">
 
 <!-- iOS "Add to Home Screen" support -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,17 +18,21 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<!-- Old Standard TT reads as antique letterpress and Marck Script as a fine
+     ink nib; both carry Cyrillic, which the usual "old book" faces (Cinzel,
+     IM Fell) do not — without it the Russian titles fall back to Times. -->
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Marck+Script&display=swap" rel="stylesheet">
 
 <!-- ?v= is a cache buster: GitHub Pages serves assets with max-age=600, so
      without it a phone keeps running the previous app.js for ten minutes
      after a deploy. Bump it whenever app.js or style.css changes. -->
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Аудиокниги Гарри Поттер</h1>
+  <p class="subtitle">господа Лунатик, Бродяга, Хвост и Сохатый<br>с гордостью представляют</p>
 </header>
 
 <main>
@@ -47,17 +51,18 @@
 
   <section class="book-list-section">
     <div class="book-list-header">
-      <h2>Все книги</h2>
-      <button id="randomPlayBtn" class="random-button" type="button">🎲 Рандом</button>
+      <button id="randomPlayBtn" class="random-button" type="button">Наугад</button>
     </div>
     <ul id="bookList" class="book-list"></ul>
     <p id="emptyState" class="empty-state" hidden>Книги пока не добавлены.</p>
   </section>
 
+  <p class="oath">Торжественно клянусь, что замышляю шалость и только шалость</p>
+
 </main>
 
 <audio id="player" preload="metadata"></audio>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

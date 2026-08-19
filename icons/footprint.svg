@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Single shoe print — used as the handle of each book's progress line, so
+     dragging it walks a footprint along a trail of dots. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -20 20 40" width="20" height="40">
+  <g fill="#3d2a17">
+    <ellipse cx="0" cy="-6" rx="7" ry="11"/>
+    <ellipse cx="0" cy="12" rx="5.2" ry="5.8"/>
+  </g>
+</svg>
