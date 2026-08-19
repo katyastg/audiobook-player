@@ -329,8 +329,14 @@
     playBook(book, val);
   }
 
+  // "Наугад" is a clean slate: every saved position is wiped, then one book
+  // starts from a random point. Nothing is left to resume.
   function randomPlay() {
     if (!books.length) return;
+
+    localStorage.removeItem(PROGRESS_KEY);
+    refreshAllRows();
+
     const book = books[Math.floor(Math.random() * books.length)];
 
     let offset = 0;

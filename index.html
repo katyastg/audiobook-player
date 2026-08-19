@@ -18,51 +18,52 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Old Standard TT reads as antique letterpress and Marck Script as a fine
-     ink nib; both carry Cyrillic, which the usual "old book" faces (Cinzel,
-     IM Fell) do not — without it the Russian titles fall back to Times. -->
-<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Marck+Script&display=swap" rel="stylesheet">
+<!-- Cormorant Garamond gives the hairline strokes and high contrast of an
+     engraved book face, Marck Script the fine ink nib. Both carry Cyrillic,
+     which the usual "old book" faces (Cinzel, IM Fell) do not — without it
+     the Russian titles would silently fall back to Times. -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Marck+Script&display=swap" rel="stylesheet">
 
 <!-- ?v= is a cache buster: GitHub Pages serves assets with max-age=600, so
      without it a phone keeps running the previous app.js for ten minutes
      after a deploy. Bump it whenever app.js or style.css changes. -->
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
-<header class="app-header">
-  <h1>Аудиокниги Гарри Поттер</h1>
-  <p class="subtitle">господа Лунатик, Бродяга, Хвост и Сохатый<br>с гордостью представляют</p>
-</header>
+<!-- The crest drawn into the background already carries the word
+     "Аудиокниги", so the real heading is here only for screen readers. -->
+<h1 class="sr-only">Аудиокниги Гарри Поттер</h1>
 
-<main>
+<main class="sheet">
 
   <section class="sleep-timer">
-    <div class="timer-row">
-      <span class="timer-icon">☾</span>
-      <button class="timer-btn" data-minutes="15" type="button">15</button>
-      <button class="timer-btn" data-minutes="30" type="button">30</button>
-      <button class="timer-btn" data-minutes="45" type="button">45</button>
-      <button class="timer-btn" data-minutes="60" type="button">60</button>
-      <span id="timerCountdown" class="timer-countdown" hidden>—</span>
-      <button id="timerCancelBtn" type="button" class="timer-cancel" hidden aria-label="Отменить таймер">✕</button>
+    <div class="timer-frame">
+      <div class="timer-row">
+        <span class="timer-icon">☾</span>
+        <button class="timer-btn" data-minutes="15" type="button">15</button>
+        <button class="timer-btn" data-minutes="30" type="button">30</button>
+        <button class="timer-btn" data-minutes="45" type="button">45</button>
+        <button class="timer-btn" data-minutes="60" type="button">60</button>
+        <span id="timerCountdown" class="timer-countdown" hidden>—</span>
+        <button id="timerCancelBtn" type="button" class="timer-cancel" hidden aria-label="Отменить таймер">✕</button>
+      </div>
     </div>
   </section>
 
-  <section class="book-list-section">
-    <div class="book-list-header">
-      <button id="randomPlayBtn" class="random-button" type="button">Наугад</button>
-    </div>
-    <ul id="bookList" class="book-list"></ul>
-    <p id="emptyState" class="empty-state" hidden>Книги пока не добавлены.</p>
-  </section>
-
-  <p class="oath">Торжественно клянусь, что замышляю шалость и только шалость</p>
+  <ul id="bookList" class="book-list"></ul>
+  <p id="emptyState" class="empty-state" hidden>Книги пока не добавлены.</p>
 
 </main>
 
+<!-- The ribbon drawn at the foot of the background reads "Наугад"; this is
+     just the tap target laid over it. -->
+<button id="randomPlayBtn" class="ribbon-button" type="button">
+  <span class="sr-only">Играть наугад</span>
+</button>
+
 <audio id="player" preload="metadata"></audio>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

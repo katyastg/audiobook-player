@@ -1,20 +1,20 @@
-/* Marauder's Map: brown ink on aged parchment. Everything is drawn with
-   hairline ink rules and dotted trails rather than filled panels — the map
-   has no solid blocks of colour, only lines on paper. */
+/* The whole page is one drawn sheet: icons/map-bg.jpg fills the screen,
+   crest at the top and the "Наугад" ribbon at the bottom, with the blank
+   middle left for live controls. Nothing is stitched together — the picture
+   is stretched to the viewport and everything else is positioned into the
+   empty areas as a share of that same viewport, so it lines up on any phone.
+
+   The ornaments (icons/ornaments.png) are black ink on white. They are not
+   cut into files: each element is shown by moving the sheet behind a box of
+   the right shape, and `mix-blend-mode: multiply` drops the white so only
+   the ink lands on the parchment. */
 :root {
-  --paper: #d9c49a;
-  --paper-light: #e6d5b0;
-  --paper-shade: #c2a878;
   --ink: #3d2a17;
   --ink-soft: #6b5236;
-  --ink-faint: rgba(61, 42, 23, 0.45);
-  --ink-rule: rgba(61, 42, 23, 0.55);
+  --ink-faint: rgba(61, 42, 23, 0.5);
   --red: #8b2f22;
-  --red-soft: #a8503f;
-  --radius: 3px;
-  --display: "Old Standard TT", Georgia, "Times New Roman", serif;
-  --script: "Marck Script", "Old Standard TT", cursive;
-  --body: "Old Standard TT", Georgia, "Times New Roman", serif;
+  --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --script: "Marck Script", "Cormorant Garamond", cursive;
 }
 
 * { box-sizing: border-box; }
@@ -22,209 +22,165 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  height: 100%;
 }
 
 body {
   color: var(--ink);
-  font-family: var(--body);
-  padding: env(safe-area-inset-top) 18px calc(env(safe-area-inset-bottom) + 28px) 18px;
+  font-family: var(--display);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #d9c49a;
+  background-image: url("icons/map-bg.jpg");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Top padding clears the crest, bottom padding the ribbon. */
+.sheet {
+  height: 100vh;
+  height: 100dvh;
+  padding: 24dvh 12% 19dvh 12%;
+  display: flex;
+  flex-direction: column;
   max-width: 560px;
   margin: 0 auto;
-  position: relative;
-  background-color: var(--paper);
-  /* Blotches and creases: uneven pooling of colour is what reads as old
-     paper — an even tint just looks like a beige page. */
-  background-image:
-    radial-gradient(ellipse 220px 160px at 12% 8%, rgba(120, 84, 40, 0.16), transparent 70%),
-    radial-gradient(ellipse 180px 140px at 88% 22%, rgba(120, 84, 40, 0.14), transparent 70%),
-    radial-gradient(ellipse 260px 200px at 70% 62%, rgba(96, 66, 30, 0.13), transparent 72%),
-    radial-gradient(ellipse 200px 150px at 20% 84%, rgba(120, 84, 40, 0.15), transparent 70%),
-    radial-gradient(ellipse 140px 110px at 50% 40%, rgba(150, 110, 60, 0.10), transparent 70%),
-    radial-gradient(circle at 50% 50%, transparent 55%, rgba(74, 50, 22, 0.28) 100%),
-    linear-gradient(160deg, var(--paper-light) 0%, var(--paper) 45%, var(--paper-shade) 100%);
-  background-attachment: fixed;
-  background-size: cover;
 }
-
-/* Footprints wander behind everything, as on the map itself. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("icons/footprints.svg");
-  background-size: 260px 260px;
-  background-repeat: repeat;
-  opacity: 0.17;
-  pointer-events: none;
-  z-index: 0;
-}
-
-body > * { position: relative; z-index: 1; }
-
-/* ---------- header ---------- */
-
-.app-header {
-  padding: 20px 0 10px 0;
-  text-align: center;
-}
-.app-header::before {
-  content: "❦";
-  display: block;
-  color: var(--red);
-  font-size: 15px;
-  opacity: 0.75;
-  margin-bottom: 6px;
-}
-.app-header h1 {
-  font-family: var(--display);
-  /* Scales down on narrow phones so the title keeps to two lines at most. */
-  font-size: clamp(21px, 6.2vw, 27px);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  line-height: 1.15;
-  margin: 0;
-  color: var(--ink);
-  text-shadow: 0 1px 0 rgba(255, 245, 225, 0.35);
-}
-.app-header .subtitle {
-  font-family: var(--script);
-  font-size: 16px;
-  color: var(--red);
-  margin: 6px 0 0 0;
-  opacity: 0.9;
-}
-/* A drawn rule, heavier in the middle and fading at the ends, the way an
-   inked flourish thins out under the nib. */
-.app-header::after {
-  content: "";
-  display: block;
-  width: 190px;
-  height: 2px;
-  margin: 12px auto 0;
-  background: radial-gradient(ellipse 95px 2px at 50% 50%, var(--ink) 0%, var(--ink-faint) 55%, transparent 100%);
-}
-
-section { margin-top: 18px; }
 
 /* ---------- sleep timer ---------- */
 
-.sleep-timer {
-  border: 1px solid var(--ink-rule);
-  border-radius: var(--radius);
-  padding: 9px 12px;
-  background: rgba(240, 228, 200, 0.28);
-  box-shadow: inset 0 0 0 3px rgba(240, 228, 200, 0.28), inset 0 0 0 4px var(--ink-faint);
+/* Ornament 1 of icons/ornaments.png: the long frame occupies x 26–1002,
+   y 193–361 of that 1024×1536 sheet. The box is given the same proportions
+   and the sheet is scaled and offset so exactly that band shows — hence the
+   odd-looking percentages here and on the other ornaments. */
+.timer-frame {
+  position: relative;
+  width: 86%;
+  margin: 0 auto;
+  aspect-ratio: 976 / 168;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.timer-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("icons/ornaments.png");
+  background-size: 104.92% auto;
+  background-position: 54.17% 14.11%;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
 .timer-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5%;
+  width: 76%;
+  position: relative;
 }
 .timer-icon {
   color: var(--ink);
-  font-size: 16px;
-  flex: 0 0 auto;
+  font-size: clamp(13px, 3.6vw, 16px);
 }
 .timer-btn {
-  padding: 5px 11px;
-  border-radius: var(--radius);
-  border: 1px solid var(--ink-rule);
+  padding: 0;
+  border: none;
   background: transparent;
   color: var(--ink-soft);
   font-family: var(--display);
-  font-size: 15px;
+  font-weight: 600;
+  font-size: clamp(14px, 4vw, 18px);
+  line-height: 1;
   cursor: pointer;
-  flex: 0 0 auto;
 }
-.timer-btn.active {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper-light);
-}
+.timer-btn.active { color: var(--red); }
 .timer-countdown {
-  font-family: var(--display);
-  font-size: 15px;
+  font-size: clamp(12px, 3.4vw, 15px);
   font-variant-numeric: tabular-nums;
   color: var(--red);
-  margin-left: auto;
 }
 .timer-cancel {
-  border: 1px solid var(--ink-rule);
+  border: none;
   background: none;
   color: var(--red);
   font-size: 13px;
   line-height: 1;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  padding: 0 2px;
   cursor: pointer;
-  flex: 0 0 auto;
 }
 
 /* ---------- book list ---------- */
 
-.book-list-header {
-  display: flex;
-  justify-content: center;
-  margin: 0 0 14px 0;
-}
-
-.random-button {
-  flex: 0 0 auto;
-  padding: 7px 20px;
-  border-radius: var(--radius);
-  border: 1px solid var(--ink);
-  background: transparent;
-  color: var(--ink);
-  font-family: var(--display);
-  font-size: 16px;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  box-shadow: inset 0 0 0 2px rgba(240, 228, 200, 0.3), inset 0 0 0 3px var(--ink-faint);
-}
-.random-button:active {
-  background: var(--ink);
-  color: var(--paper-light);
-}
-
 .book-list {
   list-style: none;
-  margin: 0;
+  margin: 1dvh 0 0 0;
   padding: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
+  /* A grey scrollbar down the parchment breaks the illusion; the list is
+     obviously scrollable from the cut-off row at the bottom. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.book-list::-webkit-scrollbar { display: none; }
+
+.book-item {
+  padding: 0;
+  cursor: pointer;
+  position: relative;
 }
 
-/* Books are separated by a hairline rule instead of sitting in boxes —
-   closer to a list inked onto the page. */
-.book-item {
-  padding: 11px 4px 10px 4px;
-  border-bottom: 1px solid var(--ink-faint);
-  cursor: pointer;
+/* Ornament 4: the vignette divider (x 200–824, y 1284–1386), drawn between
+   books instead of a plain rule. */
+.book-item + .book-item::before {
+  content: "";
+  display: block;
+  width: 28%;
+  aspect-ratio: 624 / 102;
+  margin: 0 auto;
+  background-image: url("icons/ornaments.png");
+  background-size: 164.10% auto;
+  background-position: 50% 89.54%;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
 }
-.book-item:last-child { border-bottom: none; }
-.book-item.playing .book-title { color: var(--red); }
 
 .book-title {
-  font-family: var(--display);
-  font-size: 17px;
-  letter-spacing: 0.01em;
+  font-size: clamp(13px, 3.9vw, 17px);
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 7px;
+  margin-bottom: 0;
 }
+.book-item.playing .book-title { color: var(--red); }
 .book-title::before {
-  margin-right: 8px;
+  margin-right: 7px;
   color: var(--red);
-  font-size: 14px;
+  font-size: 0.8em;
 }
-
 .book-item:nth-child(1) .book-title::before { content: "I"; }
 .book-item:nth-child(2) .book-title::before { content: "II"; }
 .book-item:nth-child(3) .book-title::before { content: "III"; }
@@ -236,27 +192,32 @@ section { margin-top: 18px; }
 .book-row {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 9px;
 }
 
+/* Ornament 3: the round rosette (x 353–671, y 834–1147), used as the frame
+   of the play button. */
 .book-play-btn {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid var(--ink);
-  background: transparent;
+  width: clamp(26px, 7.6vw, 34px);
+  aspect-ratio: 318 / 313;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+  background-image: url("icons/ornaments.png");
+  background-size: 322.01% auto;
+  background-position: 50% 68.19%;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
-.book-item.playing .book-play-btn {
-  border-color: var(--red);
-  color: var(--red);
-}
+.book-item.playing .book-play-btn { color: var(--red); }
 
 /* The progress line is a trail of dots and the handle is a footprint, so
    scrubbing walks the print along the trail. */
@@ -265,9 +226,9 @@ section { margin-top: 18px; }
   min-width: 0;
   -webkit-appearance: none;
   appearance: none;
-  height: 28px;
+  height: 20px;
   background-color: transparent;
-  background-image: radial-gradient(circle, var(--ink-faint) 1.4px, transparent 1.5px);
+  background-image: radial-gradient(circle, var(--ink-faint) 1.3px, transparent 1.4px);
   background-size: 9px 9px;
   background-position: center;
   background-repeat: repeat-x;
@@ -277,61 +238,67 @@ section { margin-top: 18px; }
 .book-seek::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 17px;
-  height: 28px;
+  width: 13px;
+  height: 20px;
   border: none;
   background: url("icons/footprint.svg") center/contain no-repeat;
   cursor: pointer;
 }
 .book-seek::-moz-range-track {
-  height: 28px;
+  height: 20px;
   background-color: transparent;
-  background-image: radial-gradient(circle, var(--ink-faint) 1.4px, transparent 1.5px);
+  background-image: radial-gradient(circle, var(--ink-faint) 1.3px, transparent 1.4px);
   background-size: 9px 9px;
   background-position: center;
   background-repeat: repeat-x;
 }
 .book-seek::-moz-range-thumb {
-  width: 17px;
-  height: 28px;
+  width: 13px;
+  height: 20px;
   border: none;
   background: url("icons/footprint.svg") center/contain no-repeat;
   cursor: pointer;
 }
 
-.book-status {
-  font-family: var(--script);
-  font-size: 15px;
-  color: var(--red);
-  margin-top: 5px;
-  padding-left: 41px;
-}
-
 .book-time {
   flex: 0 0 auto;
-  font-family: var(--display);
-  font-size: 13px;
+  font-size: clamp(11px, 3vw, 13px);
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 .book-item.playing .book-time { color: var(--red); }
 
+.book-status {
+  font-family: var(--script);
+  font-size: 13px;
+  color: var(--red);
+  margin-top: 2px;
+  padding-left: 44px;
+}
+
 .empty-state {
   color: var(--ink-soft);
   font-family: var(--script);
-  font-size: 17px;
+  font-size: 16px;
   text-align: center;
-  padding: 20px 0;
 }
 
-/* ---------- oath ---------- */
+/* ---------- ribbon button ---------- */
 
-.oath {
-  margin: 26px 0 0 0;
-  text-align: center;
-  font-family: var(--script);
-  font-size: 15px;
-  color: var(--ink-soft);
-  opacity: 0.75;
+/* The ribbon is drawn into the background, so this is just the tap target
+   laid over it. */
+.ribbon-button {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(74vw, 415px);
+  bottom: 5.5dvh;
+  height: 11dvh;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.ribbon-button:active { opacity: 0.55; }
