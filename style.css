@@ -33,7 +33,7 @@ body {
   height: 100dvh;
   overflow: hidden;
   background-color: #d9c49a;
-  background-image: url("icons/map-bg.jpg");
+  background-image: url("icons/map-bg.jpg?v=2");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -48,11 +48,16 @@ body {
   white-space: nowrap;
 }
 
-/* Top padding clears the crest, bottom padding the ribbon. */
+/* icons/map-bg.jpg is 1024×2048: the crest ends at 19.5% of its height and
+   the ribbon starts at 81.2%, which is what these paddings clear. Those
+   numbers come from tools/stretch_middle.py, which built this taller sheet
+   from the original 2:3 artwork by stretching only the blank middle — a
+   phone screen is nearer 1:2, and stretching the whole picture to fit
+   stretched the lettering on the crest and ribbon with it. */
 .sheet {
   height: 100vh;
   height: 100dvh;
-  padding: 28.5dvh 12% 19dvh 12%;
+  padding: 23.5dvh 12% 20.5dvh 12%;
   display: flex;
   flex-direction: column;
   max-width: 560px;
@@ -61,10 +66,10 @@ body {
 
 /* ---------- sleep timer ---------- */
 
-/* Ornament 1: the long frame occupies x 26–1002,
-   y 193–361 of that 1024×1536 sheet. The box is given the same proportions
-   and the sheet is scaled and offset so exactly that band shows — hence the
-   odd-looking percentages here and on the other ornaments. */
+/* Ornament 1: the long frame occupies x 26–1002, y 193–361 of the 1024×1536
+   ornament sheet. The box is given the same proportions and the sheet is
+   scaled and offset so exactly that band shows — hence the odd-looking
+   percentages here and on the other ornaments. */
 .timer-frame {
   position: relative;
   width: 86%;
@@ -290,9 +295,9 @@ body {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  width: min(74vw, 415px);
-  bottom: 5.5dvh;
-  height: 11dvh;
+  width: min(80vw, 448px);
+  bottom: 3.5dvh;
+  height: 15dvh;
   border: none;
   background: transparent;
   padding: 0;
