@@ -30,10 +30,9 @@ body {
   color: var(--ink);
   font-family: var(--display);
   height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   background-color: #d9c49a;
-  background-image: url("icons/map-bg.jpg?v=2");
+  background-image: url("icons/map-bg.jpg?v=3");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -48,16 +47,18 @@ body {
   white-space: nowrap;
 }
 
-/* icons/map-bg.jpg is 1024×2048: the crest ends at 19.5% of its height and
-   the ribbon starts at 81.2%, which is what these paddings clear. Those
-   numbers come from tools/stretch_middle.py, which built this taller sheet
-   from the original 2:3 artwork by stretching only the blank middle — a
-   phone screen is nearer 1:2, and stretching the whole picture to fit
-   stretched the lettering on the crest and ribbon with it. */
+/* icons/map-bg.jpg is 1024×2225 — the proportions of the screen — and covers
+   it end to end, running under the address bar and the toolbar. It was built
+   by tools/stretch_middle.py from the original 2:3 artwork: the crest and the
+   ribbon keep their drawn height, the blank middle takes the extra, and a
+   margin of plain parchment is added top and bottom so that what the browser
+   bars cover is margin rather than artwork.
+
+   On that sheet the crest ends at 31% and the ribbon spans 72.3–89.7%, which
+   is what these paddings clear. */
 .sheet {
   height: 100vh;
-  height: 100dvh;
-  padding: 23.5dvh 12% 20.5dvh 12%;
+  padding: 33vh 12% 29.5vh 12%;
   display: flex;
   flex-direction: column;
   max-width: 560px;
@@ -133,7 +134,7 @@ body {
 
 .book-list {
   list-style: none;
-  margin: 1dvh 0 0 0;
+  margin: 1vh 0 0 0;
   padding: 0;
   flex: 1 1 auto;
   min-height: 0;
@@ -296,8 +297,8 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: min(80vw, 448px);
-  bottom: 3.5dvh;
-  height: 15dvh;
+  bottom: 11.5vh;
+  height: 16vh;
   border: none;
   background: transparent;
   padding: 0;

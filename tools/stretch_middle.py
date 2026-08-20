@@ -22,7 +22,11 @@ KEEP_TOP = 400      # crest and everything above it
 KEEP_BOTTOM = 1150  # ribbon and everything below it
 
 
-def main(src, dst, target_height):
+def main(src, dst, target_height, pad_top=0, pad_bottom=0):
+    """pad_top/pad_bottom extend the sheet past the drawn border by repeating
+    its outermost row. The page covers the whole screen, browser bars
+    included, so without that margin the crest and the ribbon would sit
+    underneath the address bar and the toolbar."""
     width, height, channels, px = read_png(src)
     if channels < 3:
         raise SystemExit("expected a colour image")
@@ -33,8 +37,9 @@ def main(src, dst, target_height):
         return [px[base + i * channels:base + i * channels + 3] for i in range(width)]
 
     middle_src = KEEP_BOTTOM - KEEP_TOP
-    middle_dst = target_height - KEEP_TOP - (height - KEEP_BOTTOM)
-    if middle_dst < middle_src:
+    middle_dst = (target_height - pad_top - pad_bottom
+                  - KEEP_TOP - (height - KEEP_BOTTOM))
+    if middle_dst < 1:
         raise SystemExit("target height is shorter than the artwork's fixed ends")
 
     out = bytearray(width * target_height * 4)
@@ -46,8 +51,23 @@ def main(src, dst, target_height):
             out[o] = r; out[o + 1] = g; out[o + 2] = b; out[o + 3] = 255
             o += 4
 
+    # Repeating a single row smears its horizontal variation into vertical
+    # streaks, so the margin is filled with that band's average tone instead.
+    def band_average(y0, y1):
+        r = g = b = n = 0
+        for y in range(y0, y1):
+            for px3 in row(y):
+                r += px3[0]; g += px3[1]; b += px3[2]; n += 1
+        return [(r // n, g // n, b // n)] * width
+
+    first = band_average(0, 12)
+    last = band_average(height - 12, height)
+    for y in range(pad_top):
+        put(y, first)
+
+    top = pad_top
     for y in range(KEEP_TOP):
-        put(y, row(y))
+        put(top + y, row(y))
 
     for i in range(middle_dst):
         # position in the source middle, blended between the two nearest rows
@@ -56,21 +76,30 @@ def main(src, dst, target_height):
         y1 = min(y0 + 1, KEEP_BOTTOM - 1)
         t = pos - y0
         a, b = row(y0), row(y1)
-        put(KEEP_TOP + i,
+        put(top + KEEP_TOP + i,
             [(int(a[x][0] + (b[x][0] - a[x][0]) * t),
               int(a[x][1] + (b[x][1] - a[x][1]) * t),
               int(a[x][2] + (b[x][2] - a[x][2]) * t)) for x in range(width)])
 
+    tail = top + KEEP_TOP + middle_dst
     for i, y in enumerate(range(KEEP_BOTTOM, height)):
-        put(KEEP_TOP + middle_dst + i, row(y))
+        put(tail + i, row(y))
+
+    for y in range(tail + (height - KEEP_BOTTOM), target_height):
+        put(y, last)
 
     write_rgba(dst, width, target_height, out)
 
+    ribbon_top = top + KEEP_TOP + middle_dst
     print("{} ({}x{}) -> {} ({}x{})".format(src, width, height, dst, width, target_height))
-    print("crest ends at {:.1f}%, ribbon starts at {:.1f}% of the new height".format(
-        KEEP_TOP / target_height * 100,
-        (KEEP_TOP + middle_dst) / target_height * 100))
+    print("crest ends at   {:.1f}%".format((top + KEEP_TOP) / target_height * 100))
+    print("ribbon spans    {:.1f}% – {:.1f}%".format(
+        ribbon_top / target_height * 100,
+        (tail + (height - KEEP_BOTTOM)) / target_height * 100))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+    args = sys.argv[1:]
+    main(args[0], args[1], int(args[2]),
+         int(args[3]) if len(args) > 3 else 0,
+         int(args[4]) if len(args) > 4 else 0)
