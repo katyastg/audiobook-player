@@ -29,7 +29,14 @@ html, body {
 body {
   color: var(--ink);
   font-family: var(--display);
-  height: 100vh;
+  /* `height: 100vh` was pinning the page to whatever iOS Safari computed
+     `vh` as at that moment, and on her phone that came out shorter than the
+     real screen — background and content both shrank into it, leaving
+     plain parchment-colour margin above and below. `position: fixed` with
+     all four offsets at 0 sidesteps `vh` entirely: it always matches the
+     actual current viewport rectangle, bars or no bars. */
+  position: fixed;
+  inset: 0;
   overflow: hidden;
   background-color: #d9c49a;
   background-image: url("icons/map-bg.jpg?v=3");
@@ -57,7 +64,9 @@ body {
    On that sheet the crest ends at 31% and the ribbon spans 72.3–89.7%, which
    is what these paddings clear. */
 .sheet {
-  height: 100vh;
+  /* body is now the full-screen box (see the position: fixed note above);
+     100% here inherits that real size instead of recomputing its own `vh`. */
+  height: 100%;
   padding: 33vh 12% 29.5vh 12%;
   display: flex;
   flex-direction: column;
