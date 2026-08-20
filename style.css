@@ -4,10 +4,11 @@
    is stretched to the viewport and everything else is positioned into the
    empty areas as a share of that same viewport, so it lines up on any phone.
 
-   The ornaments (icons/ornaments.png) are black ink on white. They are not
-   cut into files: each element is shown by moving the sheet behind a box of
-   the right shape, and `mix-blend-mode: multiply` drops the white so only
-   the ink lands on the parchment. */
+   The ornaments come on one sheet (icons/ornaments-alpha.png) and are not
+   cut into files: each element is shown by moving that sheet behind a box
+   of the right shape. The sheet arrived as black ink on solid white and was
+   given real transparency by tools/ink_to_alpha.py — blending the white
+   away in CSS worked on desktop but not in iOS Safari. */
 :root {
   --ink: #3d2a17;
   --ink-soft: #6b5236;
@@ -60,7 +61,7 @@ body {
 
 /* ---------- sleep timer ---------- */
 
-/* Ornament 1 of icons/ornaments.png: the long frame occupies x 26–1002,
+/* Ornament 1: the long frame occupies x 26–1002,
    y 193–361 of that 1024×1536 sheet. The box is given the same proportions
    and the sheet is scaled and offset so exactly that band shows — hence the
    odd-looking percentages here and on the other ornaments. */
@@ -77,11 +78,10 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("icons/ornaments.png");
+  background-image: url("icons/ornaments-alpha.png");
   background-size: 104.92% auto;
   background-position: 54.17% 14.11%;
   background-repeat: no-repeat;
-  mix-blend-mode: multiply;
   pointer-events: none;
 }
 
@@ -158,11 +158,10 @@ body {
   width: 28%;
   aspect-ratio: 624 / 102;
   margin: 0 auto;
-  background-image: url("icons/ornaments.png");
+  background-image: url("icons/ornaments-alpha.png");
   background-size: 164.10% auto;
   background-position: 50% 89.54%;
   background-repeat: no-repeat;
-  mix-blend-mode: multiply;
 }
 
 .book-title {
@@ -204,11 +203,10 @@ body {
   border: none;
   padding: 0;
   background-color: transparent;
-  background-image: url("icons/ornaments.png");
+  background-image: url("icons/ornaments-alpha.png");
   background-size: 322.01% auto;
   background-position: 50% 68.19%;
   background-repeat: no-repeat;
-  mix-blend-mode: multiply;
   color: var(--ink);
   font-size: 11px;
   cursor: pointer;
