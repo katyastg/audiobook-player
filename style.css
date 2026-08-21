@@ -37,6 +37,12 @@ body {
      actual current viewport rectangle, bars or no bars. */
   position: fixed;
   inset: 0;
+  /* `html, body { height: 100% }` above still applies to body (nothing
+     later un-set it) — and an explicit, non-auto height on a fixed element
+     is used as-is instead of being derived from `inset: 0`, which quietly
+     cancelled that fix entirely. `auto` here is what lets top:0/bottom:0
+     actually compute the real screen height. */
+  height: auto;
   overflow: hidden;
   background-color: #d9c49a;
   background-image: url("icons/map-bg.jpg?v=3");
