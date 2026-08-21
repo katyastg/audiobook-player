@@ -45,7 +45,7 @@ body {
   height: auto;
   overflow: hidden;
   background-color: #d9c49a;
-  background-image: url("icons/map-bg.jpg?v=4");
+  background-image: url("icons/map-bg.jpg?v=5");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -62,22 +62,21 @@ body {
 
 /* icons/map-bg.jpg is 1024×2225 — the proportions of the screen — and covers
    it end to end, running under the address bar and the toolbar. It was built
-   by tools/stretch_middle.py from the original 2:3 artwork: the crest and the
-   ribbon keep their drawn height, the blank middle takes the extra, and a
-   THIN margin of plain parchment (90px of the 2225, ~4%) is added top and
-   bottom so that what the browser bars cover is margin rather than artwork.
-   The first build used a much bigger margin (290/230px) meant to clear the
-   bars by a wide berth, but it read as a big dead band of empty parchment
-   even with the bars retracted — this margin only needs to be as tall as
-   the bars themselves, not taller.
+   by tools/stretch_middle.py from the original 2:3 artwork: the crest and
+   the ribbon keep their drawn height, the blank middle takes the extra.
+   Earlier builds also padded plain parchment above the crest and below the
+   ribbon to clear the Safari bars, but any flat margin reads as a gap even
+   when it is thin, and she wants the drawn pattern itself running to both
+   edges — so there is no padding now, the border runs off the top and
+   bottom of the sheet, and the bars simply sit over the artwork.
 
-   On that sheet the crest ends at 22.0% and the ribbon spans 78.6–96.0%,
+   On that sheet the crest ends at 18.0% and the ribbon spans 82.7–100%,
    which is what these paddings clear. */
 .sheet {
   /* body is now the full-screen box (see the position: fixed note above);
      100% here inherits that real size instead of recomputing its own `vh`. */
   height: 100%;
-  padding: 24vh 12% 23.5vh 12%;
+  padding: 20vh 12% 19.5vh 12%;
   display: flex;
   flex-direction: column;
   max-width: 560px;
@@ -316,7 +315,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: min(80vw, 448px);
-  bottom: 5.2vh;
+  bottom: 1.2vh;
   height: 16vh;
   border: none;
   background: transparent;
